@@ -10,12 +10,19 @@ export default function LoginPage() {
 const handleLogin = async (e: React.FormEvent) => {
   e.preventDefault();
 
-  await signIn("credentials", {
+  const res = await signIn("credentials", {
     email,
     password,
-    callbackUrl: "/dashboard",
-    redirect: true,
+    redirect: false,
   });
+
+  console.log(res); // check this in browser console
+
+  if (res?.ok) {
+    window.location.href = "/dashboard";
+  } else {
+    console.error("Login failed:", res?.error);
+  }
 };
 
 const handleGithubLogin = async () => {
