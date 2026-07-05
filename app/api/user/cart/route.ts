@@ -1,4 +1,5 @@
 import connectDB from "@/lib/db";
+import { NextResponse } from "next/server";
 import User from "@/model/User";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
@@ -8,11 +9,12 @@ export async function POST(req: Request) {
 
   const session = await getServerSession(authOptions);
 
-  if (!session) {
-    return Response.json({ message: "Unauthorized" }, { status: 401 });
+  if (!session || !session.user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   const userEmail = session.user.email;
+
   const { productId } = await req.json();
 
   const user = await User.findOne({ email: userEmail });
@@ -42,6 +44,10 @@ export async function DELETE(req: Request) {
   const { userId, productId } = await req.json();
 
   const user = await User.findById(userId);
+
+  if (!user) {
+    return Response.json({ message: "User not found" }, { status: 404 });
+  }
 
   user.cart = user.cart.filter(
     (item: any) => item.product.toString() !== productId
